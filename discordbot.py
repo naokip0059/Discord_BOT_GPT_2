@@ -26,12 +26,14 @@ async def ping(ctx):
 @bot.command()
 async def ask(ctx, *, question):
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",  # 使用するGPTのモデル
-            prompt=question,  # ユーザーが送った質問
-            max_tokens=100  # 応答のトークン数制限
+        # ChatCompletionを使用して質問に対する応答を取得
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # 使用するモデルを指定
+            messages=[
+                {"role": "user", "content": question}  # ユーザーのメッセージを設定
+            ]
         )
-        answer = response.choices[0].text.strip()  # 応答を整形
+        answer = response.choices[0].message['content'].strip()  # 応答を整形
         await ctx.send(answer)
     except Exception as e:
         await ctx.send(f"エラーが発生しました: {str(e)}")

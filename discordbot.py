@@ -13,6 +13,26 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='/', intents=intents)
 
 @bot.event
+async def on_message(message):
+    # BOT自身がメンションされたか確認
+    if bot.user in message.mentions:
+        # メンションされたメッセージから質問を抽出
+        question = message.content.replace(f'<@!{bot.user.id}>', '').strip()  # メンションを取り除く
+        if question:
+            await ask_weather(message.channel, question)  # 質問に基づく処理を実行
+
+    await bot.process_commands(message)  # コマンドの処理を続ける
+
+async def ask_weather(channel, question):
+    # ここに天気APIを呼び出すコードを追加
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": question}]
+    )
+    answer = response.choices[0].message['content'].strip()  # 応答を整形
+    await channel.send(answer)
+
+@bot.event
 async def on_command_error(ctx, error):
     orig_error = getattr(error, "original", error)
     error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())

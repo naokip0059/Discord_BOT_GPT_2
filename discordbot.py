@@ -26,28 +26,32 @@ async def on_message(message):
             message_history.append({"role": "user", "content": question})
             
             # OpenAIに履歴を渡す
-            response = openai.ChatCompletion.create(
-                model="gpt-4-turbo-instruct",  # モデルをGPT-4oに変更
-                messages=message_history
-            )
-            answer = response.choices[0].message['content'].strip()  # 応答を整形
-            
-            # 履歴にBOTの応答を追加
-            message_history.append({"role": "assistant", "content": answer})
-            
-            await message.channel.send(answer)
+            try:
+                response = openai.ChatCompletion.create(
+                    model="gpt-4-turbo-instruct",  # モデルをGPT-4oに変更
+                    messages=message_history
+                )
+                answer = response.choices[0].message['content'].strip()  # 応答を整形
+                
+                # 履歴にBOTの応答を追加
+                message_history.append({"role": "assistant", "content": answer})
+                
+                await message.channel.send(answer)
+            except Exception as e:
+                await message.channel.send(f"エラーが発生しました: {str(e)}")
+    
+    # 他のコマンド処理を許可
+    await bot.process_commands(message)  
 
-    await bot.process_commands(message)  # コマンドの処理を続ける
+@bot.command()
+async def ping(ctx):
+    await ctx.send('pong')
 
 @bot.event
 async def on_command_error(ctx, error):
     orig_error = getattr(error, "original", error)
     error_msg = ''.join(traceback.TracebackException.from_exception(orig_error).format())
     await ctx.send(error_msg)
-
-@bot.command()
-async def ping(ctx):
-    await ctx.send('pong')
 
 # Discordのトークンを取得してBOTを起動
 token = getenv('DISCORD_BOT_TOKEN')

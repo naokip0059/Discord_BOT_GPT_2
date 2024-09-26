@@ -28,7 +28,7 @@ async def on_message(message):
             # OpenAIに履歴を渡す
             try:
                 response = openai.ChatCompletion.create(
-                    model="gpt-4-turbo-instruct",  # モデルをGPT-4oに変更
+                    model="gpt-4o",  # モデルをGPT-4oに変更
                     messages=message_history
                 )
                 answer = response.choices[0].message['content'].strip()  # 応答を整形
